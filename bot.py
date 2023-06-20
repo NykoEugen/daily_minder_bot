@@ -10,24 +10,38 @@ import telebot
 bot = telebot.TeleBot(config.token)
 
 
-@bot.message_handler(commands=["login"])
-def login_info(message):
-    keyboard = types.ForceReply(selective=False)
-    bot.send_message(message.chat.id, "Hi, login with your phone number")
-    time.sleep(1)
-    bot.send_message(message.chat.id, "Input your phone number", reply_markup=keyboard)
+@bot.message_handler(commands=["start"])
+def handle_start(message):
+    keyboard = types.ReplyKeyboardMarkup(True, True)
+    keyboard.add(types.KeyboardButton('Send phone number', request_contact=True))
+    keyboard.add(types.KeyboardButton('Denied', request_contact=None))
+    bot.send_message(message.chat.id, "Hi, I'm Daily Minder and I help you simplify your daily routine."
+                                      "We need your phone number for authorization.", reply_markup=keyboard)
+    bot.register_next_step_handler(message, handle_contact_validation)
+
+# @bot.message_handler(content_types=['text'])
+# def handle_denied(message):
+#     if message.text == 'Denied':
+#         bot.send_message(message.chat.id, "We can't get the full functionality because we haven't logged in")
 
 
-@bot.message_handler(func=lambda message: True, content_types=["text"])
-def login_print(message):
-    chat_id = message.chat.id
-    data = message.text
-    if validate_phone_number(data):
-        user_phone = data[-9:]
-        bot.send_message(chat_id, f"Your phone number: {data}")
+@bot.message_handler(content_types=['contact'])
+def handle_contact_validation(message):
+    if message.contact is not None:
+        contact = message.contact
+        phone_number = contact.phone_number
+        user_phone = phone_number[-9:]
         insert_phone_to_db(user_phone)
+        keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+        keyboard.add(types.KeyboardButton("Menu"))
+        bot.send_message(message.chat.id, "Great, thanks for a number!", reply_markup=keyboard)
+        bot.register_next_step_handler(message, handle_menu)
     else:
-        bot.send_message(chat_id, "Invalid phone number")
+        keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
+        keyboard.add(types.KeyboardButton('Send phone number', request_contact=True))
+        bot.send_message(message.chat.id, "We can't get the full functionality because we haven't logged in",
+                         reply_markup=keyboard)
+        bot.register_next_step_handler(message, handle_menu)
 
 
 def validate_phone_number(phone_number):
@@ -44,21 +58,23 @@ def insert_phone_to_db(data):
     conn.commit()
     conn.close()
 
-@bot.message_handler(commands=["start"])
-def handel_start(message):
+
+@bot.message_handler(commands=["menu"])
+def handle_menu(message):
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-    button1 = types.KeyboardButton('/Configuration')
-    button2 = types.KeyboardButton('/About')
+    button1 = types.KeyboardButton('Configuration')
+    button2 = types.KeyboardButton('About')
     keyboard.add(button1, button2)
-    bot.send_message(message.chat.id, "Hi, I'm Daily Minder and I help you simplify your daily routine", reply_markup=keyboard)
+    bot.send_message(message.chat.id, "Hi, I'm Daily Minder and I help you simplify your daily routine",
+                     reply_markup=keyboard)
 
 
-@bot.message_handler(commands=["Configuration"])
+@bot.message_handler(func=lambda message: message.text == 'Configuration')
 def handle_configuration(message):
     bot.send_message(message.chat.id, "Config your personal templates")
 
 
-@bot.message_handler(commands=["About"])
+@bot.message_handler(func=lambda message: message.text == 'About')
 def handle_about(message):
     bot.send_message(message.chat.id, "What can I do? Answer is simple many tiny things: note, notification, "
                                       "daily time-advice")
