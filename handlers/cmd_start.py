@@ -11,7 +11,7 @@ router = Router()
 @router.message(Command('start'))
 async def cmd_start(message: Message):
     await message.answer("Hello in Daily Minder Bot",
-                         reply_markup=inline_keyboard(Menu='menu', Settings='settings'))
+                         reply_markup=inline_keyboard(Menu='Menu', Settings='Settings'))
     user_id = message.from_user.id
     username = message.from_user.username
     first_name = message.from_user.first_name

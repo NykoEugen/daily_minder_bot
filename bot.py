@@ -3,7 +3,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 
 import config
-from handlers import cmd_start, cmd_menu, cmd_settings
+from handlers import cmd_start, cmd_menu, cmd_settings, cmd_reminder
 
 
 async def main():
@@ -12,7 +12,8 @@ async def main():
 
     dp.include_routers(cmd_start.router,
                        cmd_menu.router,
-                       cmd_settings.router, )
+                       cmd_settings.router,
+                       cmd_reminder.router,)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
