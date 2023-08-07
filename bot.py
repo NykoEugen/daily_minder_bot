@@ -1,22 +1,23 @@
 import asyncio
+import logging
 
 from aiogram import Bot, Dispatcher
+from aiogram.enums import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
 
 import config
-from handlers import cmd_start, cmd_menu, cmd_settings, cmd_reminder
+from handlers import handlers, reminder_handlers, db_handler
 
 
 async def main():
-    bot = Bot(token=config.token)
-    dp = Dispatcher()
+    bot = Bot(token=config.token, parse_mode=ParseMode.HTML)
+    dp = Dispatcher(storage=MemoryStorage())
 
-    dp.include_routers(cmd_start.router,
-                       cmd_menu.router,
-                       cmd_settings.router,
-                       cmd_reminder.router,)
+    dp.include_routers(handlers.router, reminder_handlers.router, db_handler.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     asyncio.run(main())
