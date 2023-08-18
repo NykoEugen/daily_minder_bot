@@ -1,6 +1,3 @@
-import time
-from datetime import datetime
-
 from aiogram import Router
 from aiogram.filters import Text
 from aiogram.fsm.context import FSMContext
@@ -57,11 +54,11 @@ async def set_time(message: Message, state: FSMContext):
     if valid_time is not None:
         data = await state.get_data()
         description = data['description']
-        day = data['day']
-        date_time = valid_datetime(day, valid_time)
-        await state.update_data(datetime_obj=date_time)
+        day_obj = data['day']
+        datetime_obj = valid_datetime(day_obj, valid_time)
+        await state.update_data(datetime_obj=datetime_obj)
         kb = inline_keyboard(confirm='Confirm')
-        await message.answer(f'Confirm reminder: {description}, at time: {date_time}', reply_markup=kb)
+        await message.answer(f'Confirm reminder: {description}, at date: {datetime_obj}', reply_markup=kb)
     else:
         await message.reply('Incorrect time format, try again')
 
@@ -74,8 +71,14 @@ async def handle_confirm(callback: CallbackQuery, state: FSMContext):
 
     user_id = callback.from_user.id
     create_reminder()
-    insert_reminder(description, datetime_obj, user_id)
+    insert_reminder(description=description, noty_at=datetime_obj, is_done=0, user_pk=user_id)
 
     await callback.message.answer('Good your reminder was set')
     await callback.answer()
     await handle_main_menu(callback)
+
+
+# @router.message
+# async def send_reminder(text, user_id, message: Message):
+#     kb = inline_keyboard(reminder='Reminders', notes='Notes', settings='Settings')
+#     await message.answer(chat_id=user_id, text=text, reply_markup=kb)

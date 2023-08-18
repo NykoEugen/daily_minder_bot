@@ -1,13 +1,10 @@
-from datetime import datetime
-
 from aiogram import Router, types
 from aiogram.filters import Command, Text
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import config
+from func.schedule_action import execute
 from handlers.db_handler import create_user, insert_user
 from keyboards.inline_keyboard import inline_keyboard
 
@@ -25,7 +22,6 @@ async def start_handler(message: Message):
     username = message.from_user.username
     first_name = message.from_user.first_name
     last_name = message.from_user.last_name
-
     create_user()
     insert_user(user_id, username, first_name, last_name)
 

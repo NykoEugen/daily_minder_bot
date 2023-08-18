@@ -12,7 +12,7 @@ def time_check(in_time):
 
 def date_check(in_date):
     try:
-        date_obj = datetime.strptime(in_date, '%d.%m.%y')
+        date_obj = datetime.strptime(in_date, '%d.%m.%y').date()
         return date_obj
     except ValueError:
         print('Invalid date format')
