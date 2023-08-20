@@ -96,6 +96,20 @@ def get_reminders_to_show(current_date):
         print(f"Error: {e}")
 
 
+def get_reminder_list(current_date):
+    try:
+        with sqlite3.connect('./users.sqlite') as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT * FROM reminder WHERE noty_at >= ?", (current_date,))
+
+            reminder = cursor.fetchall()
+        return reminder
+    except Exception as e:
+        print(f"Error: {e}")
+
+# def update_remind():
+
 
 # now = datetime.now().replace(second=0, microsecond=0)
 # datetime_str = now.strftime("%Y-%m-%d %H:%M")

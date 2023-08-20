@@ -27,12 +27,8 @@ def valid_datetime(date_obj, time_obj):
         return e
 
 
-
-# set_time = '32.60'
-# date = '25.20.23'
-# valid_time = time_check(set_time)
-# print(valid_time)
-# valid_date = date_check(date)
-# print(valid_date)
-# date_time = valid_datetime(valid_date, valid_time)
-# print(date_time)
+def time_formatting():
+    now = datetime.now().replace(second=0, microsecond=0)
+    datetime_str = now.strftime("%Y-%m-%d %H:%M")
+    datetime_obj = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+    return datetime_obj
