@@ -1,15 +1,10 @@
 import asyncio
-import time
-from datetime import datetime
 
-import schedule
-from aiogram import Router, Bot, Dispatcher
+from aiogram import Bot
 from aiogram.enums import ParseMode
-from aiogram.types import Message
 
 import config
-from func.schedule_reminder import RemindersCheck
-from handlers.db_handler import get_reminders_to_show
+from func.reminders_today_list import schedule_alert
 from keyboards.inline_keyboard import inline_keyboard
 
 
@@ -17,13 +12,8 @@ def execute():
     while True:
         def cron_routine():
             print('cron works')
-            now = datetime.now().replace(second=0, microsecond=0)
-            datetime_str = now.strftime("%Y-%m-%d %H:%M")
-            datetime_obj = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
-            reminders = get_reminders_to_show(datetime_obj)
-            scheduler = RemindersCheck(reminders)
-            scheduler.schedule_alert()
-            if data := scheduler.schedule_now_lst:
+            data = schedule_alert()
+            if data:
                 return data
 
         async def main():
