@@ -12,6 +12,7 @@ def schedule_alert():
             data = {
                 "id": item[0],
                 "description": item[1],
+                "event_id": item[3],
                 "time": item[2],
                 "user_id": item[4],
             }

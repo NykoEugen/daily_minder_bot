@@ -17,7 +17,7 @@ def execute():
                 return data
 
         async def main():
-            bot = Bot(token=config.token, parse_mode=ParseMode.HTML)
+            bot = Bot(token=config.BOT_TOKEN, parse_mode=ParseMode.HTML)
 
             while True:
                 data = cron_routine()

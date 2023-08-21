@@ -15,7 +15,7 @@ router = Router()
 async def start_handler(message: Message):
     kb = InlineKeyboardBuilder()
     kb.add(types.InlineKeyboardButton(text='Main menu', callback_data='main_menu'))
-    kb.add(types.InlineKeyboardButton(text='About', url=config.web_site))
+    kb.add(types.InlineKeyboardButton(text='About', url=config.WEB_SITE))
     await message.answer('Hello in Minder Bot', reply_markup=kb.as_markup())
 
     user_id = message.from_user.id
@@ -45,14 +45,14 @@ async def handle_reminder(callback: CallbackQuery):
 async def handle_reminder(callback: CallbackQuery):
     kb = inline_keyboard(note_list='List of notes', add_note='Add note',
                          remove_note='Remove note')
-    await callback.message.answer('Note Menu', reply_markup=kb)
+    await callback.message.answer('Note Menu, in progres', reply_markup=kb)
     await callback.answer()
 
 
 @router.callback_query(Text('setting', ignore_case=True))
 async def handle_reminder(callback: CallbackQuery):
     kb = inline_keyboard(notification_time='Notification time')
-    await callback.message.answer('Settings Menu', reply_markup=kb)
+    await callback.message.answer('Settings Menu, in progres', reply_markup=kb)
     await callback.answer()
 
 
