@@ -101,7 +101,8 @@ def get_reminder_list(current_date):
         with sqlite3.connect('./users.sqlite') as conn:
             cursor = conn.cursor()
 
-            cursor.execute("SELECT * FROM reminder WHERE noty_at >= ?", (current_date,))
+            cursor.execute("SELECT * FROM reminder WHERE noty_at >= ? ORDER BY noty_at",
+                           (current_date,))
 
             reminder = cursor.fetchall()
         return reminder

@@ -1,10 +1,12 @@
 import asyncio
 import logging
+import queue
 import threading
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
+from dotenv import load_dotenv
 
 import config
 from func.schedule_action import execute
@@ -13,7 +15,7 @@ from handlers import handlers_menu, set_reminder_handlers, db_handler, show_remi
 
 
 async def main():
-    bot = Bot(token=config.token, parse_mode=ParseMode.HTML)
+    bot = Bot(token=config.BOT_TOKEN, parse_mode=ParseMode.HTML)
     dp = Dispatcher(storage=MemoryStorage())
 
     dp.include_routers(handlers_menu.router, set_reminder_handlers.router,
