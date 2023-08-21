@@ -1,14 +1,13 @@
 import asyncio
 import logging
-import queue
 import threading
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from dotenv import load_dotenv
 
 import config
+from func import schedule_action
 from func.schedule_action import execute
 
 from handlers import handlers_menu, set_reminder_handlers, db_handler, show_reminders_handler
@@ -19,7 +18,7 @@ async def main():
     dp = Dispatcher(storage=MemoryStorage())
 
     dp.include_routers(handlers_menu.router, set_reminder_handlers.router,
-                       db_handler.router, show_reminders_handler.router, )
+                       db_handler.router, show_reminders_handler.router, schedule_action.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())

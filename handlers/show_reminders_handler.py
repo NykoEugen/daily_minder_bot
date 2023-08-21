@@ -2,7 +2,9 @@ from aiogram import Router
 from aiogram.filters import Text
 from aiogram.types import CallbackQuery
 
+from func.regex_id_reminder import regex_id_reminder
 from func.reminders_today_list import reminder_list
+from handlers.db_handler import edit_reminder_stat
 from keyboards.inline_keyboard import inline_keyboard
 
 router = Router()
@@ -25,7 +27,9 @@ async def show_reminder_list(callback: CallbackQuery):
 
 
 @router.callback_query(Text('confirm_event'))
-async def confirm_event_handler(callback: CallbackQuery):
-    print(callback.message)
-    print(callback.data)
-    await callback.message.answer("Thanks event confirmed")
+async def confirmed_alert(callback: CallbackQuery):
+    data_alert = callback.message.text
+    reminder_id = regex_id_reminder(data_alert)
+    edit_reminder_stat(reminder_id)
+    kb = inline_keyboard(reminder='Reminders', notes='Notes', settings='Settings')
+    await callback.message.answer("Reminder is done", reply_markup=kb)
