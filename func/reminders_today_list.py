@@ -28,6 +28,7 @@ def reminder_list():
 
     for item in lst:
         data = {
+            "reminder_id": item[0],
             "description": item[1],
             "time": item[2],
         }

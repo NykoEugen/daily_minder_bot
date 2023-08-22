@@ -6,8 +6,7 @@ from aiogram.types import CallbackQuery, Message
 
 from func.DayTimeCheck import time_check, date_check, valid_datetime
 from handlers.db_handler import create_reminder, insert_reminder
-from handlers.handlers_menu import handle_main_menu
-from keyboards.inline_keyboard import inline_keyboard
+from keyboards.inline_keyboard import inline_keyboard, main_menu_buttons
 
 router = Router()
 
@@ -18,6 +17,7 @@ class MyState(StatesGroup):
     set_time = State()
     date_time = State()
     reminder_id = State()
+    remove = State()
 
 
 @router.callback_query(Text('set_remind'))
@@ -74,7 +74,9 @@ async def handle_confirm(callback: CallbackQuery, state: FSMContext):
     create_reminder()
     insert_reminder(description=description, noty_at=datetime_obj, is_done=0, user_pk=user_id)
 
-    await callback.message.answer('Good your reminder was set')
+    kb = main_menu_buttons()
+
+    await callback.message.answer('Good your reminder was set', reply_markup=kb)
     await callback.answer()
-    await handle_main_menu(callback)
+
 

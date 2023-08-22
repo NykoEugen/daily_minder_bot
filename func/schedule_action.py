@@ -31,6 +31,7 @@ def execute():
                                     f"Description: {item['description']}.")
                         kb = inline_keyboard(confirm_event="Confirm event")
                         await bot.send_message(text=str_text, chat_id=item['user_id'], reply_markup=kb)
+                        await bot.session.close()
                 await asyncio.sleep(60)
 
         asyncio.run(main())

@@ -121,3 +121,16 @@ def edit_reminder_stat(reminder_id):
         print("Status changed")
     except Exception as e:
         print(f"Error updating: {e}")
+
+
+def delete_reminder_from_db(reminder_id):
+    try:
+        with sqlite3.connect('./users.sqlite') as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("DELETE FROM reminder WHERE id = ?",
+                           (reminder_id,))
+            conn.commit()
+        print("Reminder was delete")
+    except Exception as e:
+        print(f"Error deleting: {e}")
