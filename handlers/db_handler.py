@@ -88,12 +88,12 @@ def get_reminders_to_show(current_date):
         with sqlite3.connect('./users.sqlite') as conn:
             cursor = conn.cursor()
 
-            cursor.execute("SELECT * FROM reminder WHERE noty_at = ?", (current_date,))
+            cursor.execute("SELECT * FROM reminder WHERE noty_at <= ? AND is_done = 0", (current_date,))
 
             reminder = cursor.fetchall()
         return reminder
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error alert list: {e}")
 
 
 def get_reminder_list(current_date):
@@ -107,13 +107,17 @@ def get_reminder_list(current_date):
             reminder = cursor.fetchall()
         return reminder
     except Exception as e:
-        print(f"Error: {e}")
-
-# def update_remind():
+        print(f"Error reminder list: {e}")
 
 
-# now = datetime.now().replace(second=0, microsecond=0)
-# datetime_str = now.strftime("%Y-%m-%d %H:%M")
-# datetime_obj = datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
-# a = get_reminders_to_show(datetime_obj)
-# print(a)
+def edit_reminder_stat(reminder_id):
+    try:
+        with sqlite3.connect('./users.sqlite') as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("UPDATE reminder SET is_done = ? WHERE id = ?",
+                           (1, reminder_id,))
+            conn.commit()
+        print("Status changed")
+    except Exception as e:
+        print(f"Error updating: {e}")

@@ -6,18 +6,19 @@ def schedule_alert():
     schedule_lst = []
     datetime_obj = time_formatting()
     reminders = get_reminders_to_show(datetime_obj)
-    for item in reminders:
-        item_time = item[2]
-        if str(datetime_obj) == item_time:
-            data = {
-                "id": item[0],
-                "description": item[1],
-                "event_id": item[3],
-                "time": item[2],
-                "user_id": item[4],
-            }
-            schedule_lst.append(data)
-    return schedule_lst
+    if reminders is not None:
+        for item in reminders:
+            item_time = item[2]
+            if str(datetime_obj) >= item_time:
+                data = {
+                    "id": item[0],
+                    "description": item[1],
+                    "event_id": item[3],
+                    "time": item[2],
+                    "user_id": item[4],
+                }
+                schedule_lst.append(data)
+        return schedule_lst
 
 
 def reminder_list():
