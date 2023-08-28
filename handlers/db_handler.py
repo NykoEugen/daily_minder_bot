@@ -1,123 +1,144 @@
-import sqlite3
-from datetime import datetime
-
+from sqlalchemy import create_engine, text
+from sqlalchemy.exc import SQLAlchemyError
 from aiogram import Router
+
+from config import DB_URL
 
 router = Router()
 
+db_url = DB_URL
+engine = create_engine(db_url, echo=True)
 
-def create_user():
+
+def create_table_user():
     try:
-        with sqlite3.connect('./users.sqlite') as conn:
-            cursor = conn.cursor()
+        query = '''CREATE TABLE IF NOT EXISTS users ( 
+                                 id serial PRIMARY KEY, 
+                                 user_id integer UNIQUE,
+                                 username varchar UNIQUE, 
+                                 first_name varchar, 
+                                 last_name varchar)'''
 
-            cursor.execute('''CREATE TABLE IF NOT EXISTS users (
-                                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                user_id TEXT UNIQUE,
-                                username TEXT UNIQUE,
-                                first_name TEXT,
-                                last_name TEXT
-                           )''')
+        with engine.connect() as conn:
+            conn.execute(text(query))
             conn.commit()
             print("user table created")
-    except sqlite3.Error as e:
+
+    except SQLAlchemyError as e:
         print(f"Error creating table: {e}")
 
 
 def insert_user(user_id, username, first_name, last_name):
     try:
-        with sqlite3.connect('./users.sqlite') as conn:
-            cursor = conn.cursor()
+        query = '''INSERT INTO users (user_id, username, first_name, last_name)
+                VALUES (:user_id, :username, :first_name, :last_name)'''
 
-            cursor.execute("INSERT INTO users (user_id, username, first_name, last_name) VALUES (?, ?, ?, ?)",
-                           (user_id, username, first_name, last_name))
+        with engine.connect() as conn:
+            conn.execute(text(query),
+                         {"user_id": user_id, "username": username, "first_name": first_name, "last_name": last_name})
             conn.commit()
             print("user created successful")
-    except sqlite3.Error as e:
+
+    except SQLAlchemyError as e:
         print(f"Error inserting user: {e}")
 
 
 def create_reminder():
     try:
-        with sqlite3.connect('./users.sqlite') as conn:
-            cursor = conn.cursor()
+        query = '''CREATE TABLE IF NOT EXISTS reminder (
+                                id serial PRIMARY KEY,
+                                description varchar,
+                                noty_at timestamp,
+                                is_done boolean,
+                                user_pk integer,
+                                FOREIGN KEY (user_pk) REFERENCES users(user_id))'''
 
-            cursor.execute('''CREATE TABLE IF NOT EXISTS reminder (
-                                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                description TEXT,
-                                noty_at DATETIME,
-                                is_done INTEGER,
-                                user_pk INTEGER,
-                                FOREIGN KEY (user_pk) REFERENCES users(user_id)
-                           )''')
+        with engine.connect() as conn:
+            conn.execute(text(query))
             conn.commit()
             print("reminder table create")
-    except sqlite3.Error as e:
+
+    except SQLAlchemyError as e:
         print(f"Error creating table: {e}")
 
 
 def insert_reminder(description, noty_at, is_done, user_pk):
     try:
-        with sqlite3.connect('./users.sqlite') as conn:
-            cursor = conn.cursor()
+        query = '''INSERT INTO reminder (description, noty_at, is_done, user_pk)
+                VALUES (:description, :noty_at, :is_done, :user_pk)'''
 
-            cursor.execute("INSERT INTO reminder (description, noty_at, is_done, user_pk) "
-                           "VALUES (?, ?, ?, ?)", (description, noty_at, is_done, user_pk))
+        with engine.connect() as conn:
+            conn.execute(text(query),
+                         {"description": description, "noty_at": noty_at, "is_done": is_done, "user_pk": user_pk})
             conn.commit()
             print("reminder created successful")
-    except sqlite3.Error as e:
+
+    except SQLAlchemyError as e:
         print(f"Error inserting reminder: {e}")
 
 
-def valid_pk(input_id):
-    try:
-        with sqlite3.connect('../users.sqlite') as conn:
-            cursor = conn.cursor()
-
-            cursor.execute("SELECT id FROM users WHERE user_id = ?", (input_id,))
-
-            result = cursor.fetchone()
-            print(result[0])
-            return result[0]
-    except sqlite3.Error as e:
-        return print(f"Error user don't found {e}")
+# def valid_pk(input_id):
+#     try:
+#         with sqlite3.connect('../users.sqlite') as conn:
+#             cursor = conn.cursor()
+#
+#             cursor.execute("SELECT id FROM users WHERE user_id = ?", (input_id,))
+#
+#             result = cursor.fetchone()
+#             print(result[0])
+#             return result[0]
+#     except sqlite3.Error as e:
+#         return print(f"Error user don't found {e}")
 
 
 def get_reminders_to_show(current_date):
     try:
-        with sqlite3.connect('./users.sqlite') as conn:
-            cursor = conn.cursor()
+        query = '''SELECT * FROM reminder WHERE noty_at <= :current_date AND is_done = FALSE'''
 
-            cursor.execute("SELECT * FROM reminder WHERE noty_at <= ? AND is_done = 0", (current_date,))
+        with engine.connect() as conn:
+            reminder = conn.execute(text(query), {"current_date": current_date}).fetchall()
 
-            reminder = cursor.fetchall()
         return reminder
-    except Exception as e:
+    except SQLAlchemyError as e:
         print(f"Error alert list: {e}")
 
 
 def get_reminder_list(current_date):
     try:
-        with sqlite3.connect('./users.sqlite') as conn:
-            cursor = conn.cursor()
+        query = '''SELECT * FROM reminder WHERE noty_at >= :current_date ORDER BY noty_at'''
 
-            cursor.execute("SELECT * FROM reminder WHERE noty_at >= ? ORDER BY noty_at",
-                           (current_date,))
+        with engine.connect() as conn:
+            reminder = conn.execute(text(query), {"current_date": current_date}).fetchall()
 
-            reminder = cursor.fetchall()
         return reminder
-    except Exception as e:
+    except SQLAlchemyError as e:
         print(f"Error reminder list: {e}")
 
 
 def edit_reminder_stat(reminder_id):
     try:
-        with sqlite3.connect('./users.sqlite') as conn:
-            cursor = conn.cursor()
+        query = '''UPDATE reminder SET is_done = :is_done WHERE id = :reminder_id'''
 
-            cursor.execute("UPDATE reminder SET is_done = ? WHERE id = ?",
-                           (1, reminder_id,))
+        with engine.connect() as conn:
+            conn.execute(text(query), {"reminder_id": reminder_id, "is_done": True})
             conn.commit()
-        print("Status changed")
-    except Exception as e:
+            print("Status changed")
+
+    except SQLAlchemyError as e:
         print(f"Error updating: {e}")
+
+
+def delete_reminder_from_db(reminder_id):
+    try:
+        query = '''DELETE FROM reminder WHERE id = :reminder_id'''
+
+        with engine.connect() as conn:
+            conn.execute(text(query), {"reminder_id": reminder_id})
+            conn.commit()
+            print("Reminder was delete")
+
+    except SQLAlchemyError as e:
+        print(f"Error deleting: {e}")
+
+#
+# insert_user(9809809, "sdjfhjk", "sgdf", "fwefg")
