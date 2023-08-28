@@ -2,7 +2,7 @@ from aiogram import Router
 from aiogram.filters import Command, Text
 from aiogram.types import Message, CallbackQuery
 
-from handlers.db_handler import create_user, insert_user
+from handlers.db_handler import create_table_user, insert_user
 from keyboards.inline_keyboard import inline_keyboard, main_menu_buttons
 
 router = Router()
@@ -14,11 +14,14 @@ async def start_handler(message: Message):
 
     await message.answer('Hello in Minder Bot', reply_markup=kb)
 
-    user_id = message.from_user.id
+    try:
+        user_id = int(message.from_user.id)
+    except TypeError as e:
+        return e
     username = message.from_user.username
     first_name = message.from_user.first_name
     last_name = message.from_user.last_name
-    create_user()
+    create_table_user()
     insert_user(user_id, username, first_name, last_name)
 
 
@@ -30,8 +33,8 @@ async def handle_reminder(callback: CallbackQuery):
     await callback.answer()
 
 
-@router.message()
-async def unknown_message(message: Message):
-    kb = main_menu_buttons()
-    await message.reply("Sorry I don't know what you mean.\nTry this 👇", reply_markup=kb)
+# @router.message()
+# async def unknown_message(message: Message):
+#     kb = main_menu_buttons()
+#     await message.reply("Sorry I don't know what you mean.\nTry this 👇", reply_markup=kb)
 

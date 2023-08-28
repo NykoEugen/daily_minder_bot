@@ -70,9 +70,13 @@ async def handle_confirm(callback: CallbackQuery, state: FSMContext):
     description = data['description']
     datetime_obj = data['datetime_obj']
 
-    user_id = callback.from_user.id
+    try:
+        user_id = int(callback.from_user.id)
+    except TypeError as e:
+        return e
+
     create_reminder()
-    insert_reminder(description=description, noty_at=datetime_obj, is_done=0, user_pk=user_id)
+    insert_reminder(description=description, noty_at=datetime_obj, is_done=False, user_pk=user_id)
 
     kb = main_menu_buttons()
 
