@@ -4,7 +4,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import CallbackQuery, Message
 
-from func.DayTimeCheck import time_check, date_check, valid_datetime
+from func.DayTimeCheck import time_check, date_check, valid_datetime, datetime_to_utc3
 from handlers.db_handler import create_reminder, insert_reminder
 from keyboards.inline_keyboard import inline_keyboard, main_menu_buttons
 
@@ -57,9 +57,10 @@ async def set_time(message: Message, state: FSMContext):
         description = data['description']
         day_obj = data['day']
         datetime_obj = valid_datetime(day_obj, valid_time)
+        date_for_user = datetime_to_utc3(datetime_obj)
         await state.update_data(datetime_obj=datetime_obj)
         kb = inline_keyboard(confirm='Confirm')
-        await message.answer(f'Confirm reminder: {description}, at date: {datetime_obj}', reply_markup=kb)
+        await message.answer(f'Confirm reminder: {description}, at date: {date_for_user}', reply_markup=kb)
     else:
         await message.reply('Incorrect time format, try again')
 
@@ -70,10 +71,7 @@ async def handle_confirm(callback: CallbackQuery, state: FSMContext):
     description = data['description']
     datetime_obj = data['datetime_obj']
 
-    try:
-        user_id = int(callback.from_user.id)
-    except TypeError as e:
-        return e
+    user_id = callback.from_user.id
 
     create_reminder()
     insert_reminder(description=description, noty_at=datetime_obj, is_done=False, user_pk=user_id)
