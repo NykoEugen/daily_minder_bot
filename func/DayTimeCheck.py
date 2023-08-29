@@ -1,3 +1,4 @@
+import calendar
 from datetime import datetime
 
 import pytz
@@ -15,13 +16,27 @@ def time_check(in_time):
         return None
 
 
+def is_valid_date(in_date):
+    try:
+        day, month, year = map(int, in_date.split('.'))
+        if month < 1 or month > 12:
+            return False
+        max_day = calendar.monthrange(year, month)[1]
+        if day < 1 or day > max_day:
+            return False
+        return True
+    except ValueError:
+        return False
+
+
 def date_check(in_date):
     try:
-        user_tz = pytz.timezone('Europe/Kiev')
-        user_date_obj = datetime.strptime(in_date, '%d.%m.%y').date()
-        user_datetime = datetime.combine(user_date_obj, datetime.max.time())
-        utc_date = user_tz.localize(user_datetime).astimezone(pytz.utc).date()
-        return utc_date
+        if is_valid_date(in_date):
+            user_tz = pytz.timezone('Europe/Kiev')
+            user_date_obj = datetime.strptime(in_date, '%d.%m.%y').date()
+            user_datetime = datetime.combine(user_date_obj, datetime.max.time())
+            utc_date = user_tz.localize(user_datetime).astimezone(pytz.utc).date()
+            return utc_date
     except ValueError:
         print('Invalid date format')
         return None
