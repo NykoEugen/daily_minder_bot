@@ -103,24 +103,24 @@ def get_reminders_to_show(current_date):
         print(f"Error alert list: {e}")
 
 
-def get_reminder_list(current_date):
+def get_reminder_list(current_date, user):
     try:
-        query = '''SELECT * FROM reminder WHERE noty_at >= :current_date ORDER BY noty_at'''
+        query = '''SELECT * FROM reminder WHERE noty_at >= :current_date AND user_pk = :user ORDER BY noty_at'''
 
         with engine.connect() as conn:
-            reminder = conn.execute(text(query), {"current_date": current_date}).fetchall()
+            reminder = conn.execute(text(query), {"current_date": current_date, "user": user}).fetchall()
 
         return reminder
     except SQLAlchemyError as e:
         print(f"Error reminder list: {e}")
 
 
-def edit_reminder_stat(reminder_id):
+def edit_reminder_stat(reminder_id, user):
     try:
-        query = '''UPDATE reminder SET is_done = :is_done WHERE id = :reminder_id'''
+        query = '''UPDATE reminder SET is_done = :is_done WHERE id = :reminder_id AND user_pk = :user'''
 
         with engine.connect() as conn:
-            conn.execute(text(query), {"reminder_id": reminder_id, "is_done": True})
+            conn.execute(text(query), {"reminder_id": reminder_id, "is_done": True, "user": user})
             conn.commit()
             print("Status changed")
 
@@ -128,17 +128,16 @@ def edit_reminder_stat(reminder_id):
         print(f"Error updating: {e}")
 
 
-def delete_reminder_from_db(reminder_id):
+def delete_reminder_from_db(reminder_id, user):
     try:
-        query = '''DELETE FROM reminder WHERE id = :reminder_id'''
+        query = '''DELETE FROM reminder WHERE id = :reminder_id AND user_pk = :user'''
 
         with engine.connect() as conn:
-            conn.execute(text(query), {"reminder_id": reminder_id})
+            conn.execute(text(query), {"reminder_id": reminder_id, "user": user})
             conn.commit()
             print("Reminder was delete")
 
     except SQLAlchemyError as e:
         print(f"Error deleting: {e}")
 
-#
-# insert_user(9809809, "sdjfhjk", "sgdf", "fwefg")
+

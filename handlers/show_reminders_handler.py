@@ -5,6 +5,7 @@ from aiogram.types import CallbackQuery, Message
 
 from func.regex_id_reminder import regex_id_reminder
 from func.reminders_today_list import reminder_list
+from func.valid_int import valid_int
 from handlers.db_handler import edit_reminder_stat, delete_reminder_from_db
 from handlers.set_reminder_handlers import MyState
 from keyboards.inline_keyboard import inline_keyboard, main_menu_buttons
@@ -15,8 +16,9 @@ router = Router()
 @router.callback_query(Text('reminder_list'))
 async def show_reminder_list(callback: CallbackQuery):
     kb = inline_keyboard(remove_reminder="Delete", back="Back")
+    valid_user_pk = callback.from_user.id
     event_str = ""
-    lst = reminder_list()
+    lst = reminder_list(valid_user_pk)
     if len(lst) == 0:
         event_str += "You don't have events"
     elif len(lst) >= 0:
@@ -33,7 +35,9 @@ async def show_reminder_list(callback: CallbackQuery):
 async def confirmed_alert(callback: CallbackQuery):
     data_alert = callback.message.text
     reminder_id = regex_id_reminder(data_alert)
-    edit_reminder_stat(reminder_id)
+    valid_user_pk = callback.from_user.id
+    print(valid_user_pk)
+    edit_reminder_stat(reminder_id, valid_user_pk)
     kb = main_menu_buttons()
     await callback.message.answer("Reminder is done", reply_markup=kb)
 
@@ -54,12 +58,12 @@ async def back_to_menu(callback: CallbackQuery):
 async def remove_reminder(message: Message, state: FSMContext):
     data = message.text
     kb = main_menu_buttons()
-
-    try:
-        int_val = int(data)
-        delete_reminder_from_db(int_val)
+    int_val = valid_int(data)
+    valid_user_pk = message.from_user.id
+    if int_val:
+        delete_reminder_from_db(int_val, valid_user_pk)
         await message.answer("Reminder was deleted successful", reply_markup=kb)
-    except TypeError as e:
+    else:
         await message.reply("Incorrect value, pleas check")
 
     await state.clear()
